@@ -88,7 +88,7 @@ def settings_adjust(request, uri):
         if request.user.check_password(request.POST['oldPass']):
             request.user.set_password(request.POST['newPass'])
             request.user.save()
-            return "success"
+            return redirect('/settings')
         else:
             return settings_view(request, True)
 
@@ -117,6 +117,19 @@ def class_view(request):
             'classes': classes
         }
         return render(request, 'classes_s.html', query)
+
+
+def single_class_view(request, class_id):
+    if not request.user.is_authenticated():
+        return redirect('/login')
+
+    cls = Class.objects.filter(id=class_id).first()
+    if User.objects.filter(user=request.user, Class=cls).count() == 0:
+        return redirect('/login')
+    query = {
+        'assignments': cls.assignments.all()
+    }
+    return render(request, 'single_class.html', query)
 
 
 def dashboard(request):

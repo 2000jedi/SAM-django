@@ -62,7 +62,7 @@
                     <div class='title-text'> {{ assignment.Class }}</div>
                     <hr />
                     <div class='assignment-info'> {% if assignment.type == 1 %} Assignment {% else %} Information {% endif %} From</div>
-                    <h2 class='subject'> {{ assignment.subject }} </h2>
+                    <h2 class='subject'> {{ assignment.teacher.subject }} </h2>
                 </div>
                 <div class='content'>
                     <div class='content-text' id=' assignment-list-content-{{ assignment.id }}'>

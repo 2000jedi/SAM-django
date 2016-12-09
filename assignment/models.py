@@ -12,7 +12,7 @@ class User(models.Model):
     type = models.CharField(max_length=1)
     ChineseName = models.CharField(max_length=255, blank=True)
     EnglishName = models.CharField(max_length=255, blank=True)
-    Class = models.ManyToManyField('assignment.Class', blank=True)
+    Class = models.ManyToManyField('assignment.Class', default=[], blank=True)
     subject = models.CharField(max_length=255, blank=True)
 
 
@@ -22,7 +22,7 @@ class Class(models.Model):
 
     teacher = models.ForeignKey('assignment.User')
     name = models.CharField(max_length=255)
-    assignments = models.ManyToManyField('assignment.Assignment')
+    assignments = models.ManyToManyField('assignment.Assignment', default=[])
 
 
 class Attachment(models.Model):
@@ -58,7 +58,7 @@ class Assignment(models.Model):
     type = models.SmallIntegerField()
     content = models.TextField()
     duration = models.IntegerField(null=True, blank=True)
-    attachments = models.ManyToManyField('assignment.Attachment', blank=True)
+    attachments = models.ManyToManyField('assignment.Attachment', default=[], blank=True)
 
     def get_attachments(self):
         return self.attachments.all()
@@ -73,7 +73,7 @@ class Assignment(models.Model):
 
 class PersonalAssignment(models.Model):
     def __unicode__(self):
-        return self.id
+        return str(self.id)
     id = models.IntegerField(primary_key=True, unique=True, auto_created=True)
     assignment = models.ForeignKey('assignment.Assignment')
     student = models.ForeignKey('assignment.User')
