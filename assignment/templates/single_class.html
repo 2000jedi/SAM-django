@@ -39,13 +39,13 @@
                                 {{ assignment.content|linebreaksbr }}
                                 {% endautoescape %}
                             </div>
-                            {% if attachment_query|length > 0 %}
-                            <hr class='attachment-divider' style='bottom: calc(0.5em + 1.5em * ({{ attachment_query|length }}-1)/2);'>
-                            {% for attachment in assignment.attachment_query %}
-                            <div style='display: flex; flex-direction: row;'>
-                                <span class='material-icons'>attachment</span>
-                                <div class='attachment-holder'>
-                                    <a target=_blank style='text-indent: 5px' href='/attachment/{{ attachment.md5 }}'> attachment.name </a>
+                            {% if assignment.attachments.all|length > 0 %}
+                            <hr class='attachment-divider' style='bottom: calc(0.5em + 1.5em * ({{ assignment.attachments.all|length }}));'>
+                            {% for attachment in assignment.attachments.all %}
+                            <div class='attachment-holder'>
+                                <div style='display: flex; flex-direction: row;'>
+                                    <span class='material-icons'>attachment</span>
+                                    <a target=_blank style='text-indent: 5px' href='/attachment/{{ attachment.md5 }}'> {{ attachment.name }} </a>
                                 </div>
                             </div>
                             {% endfor %}

@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^login$', views.login_view, name='login'),
     url(r'^logout$', views.logout_view, name='logout'),
     url(r'^attachment/([a-z,A-Z,0-9]+)$', views.attachment_get, name='attachment'),
+    url(r'^updateSQL', views.update_sql, name='updateSQL')
 ]

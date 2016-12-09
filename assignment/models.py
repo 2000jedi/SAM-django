@@ -9,7 +9,7 @@ class User(models.Model):
         return self.user.username
 
     user = models.OneToOneField('auth.User', unique=True)
-    type = models.CharField(max_length=1)
+    type = models.CharField(max_length=1, choices=(('s', 'student'), ('t', 'teacher')))
     ChineseName = models.CharField(max_length=255, blank=True)
     EnglishName = models.CharField(max_length=255, blank=True)
     Class = models.ManyToManyField('assignment.Class', default=[], blank=True)
@@ -27,26 +27,24 @@ class Class(models.Model):
 
 class Attachment(models.Model):
     def __unicode__(self):
-        return self.name
+        return str(self.name)
 
     name = models.CharField(max_length=255)
     content = models.FileField(upload_to='Files')
-    md5 = models.CharField(max_length=255, primary_key=True, unique=True)
+    md5 = models.CharField(max_length=255, primary_key=True, unique=True, blank=True)
 
     def get_size(self):
         return self.content.size
     size = property(get_size)
 
     def save(self, *args, **kwargs):
-        self.content.name += random.choice(range(1, 10000))
         super(Attachment, self)
-        f = self.content.open('rb')
+        print(self.content.url)
+        f = self.content.read()
+        print(f)
         md5 = hashlib.md5()
-        if f.multiple_chunks():
-            for chunk in f.chunks():
-                md5.update(chunk)
-        else:
-            md5.update(f.read())
+        for chunk in f.chunks:
+            md5.update(chunk)
         f.close()
         self.md5 = md5.hexdigest()
 
@@ -55,14 +53,10 @@ class Assignment(models.Model):
     def __unicode__(self):
         return self.content[:16]
 
-    type = models.SmallIntegerField()
+    type = models.SmallIntegerField(choices=((1, 'assignment'), (2, 'information')))
     content = models.TextField()
     duration = models.IntegerField(null=True, blank=True)
     attachments = models.ManyToManyField('assignment.Attachment', default=[], blank=True)
-
-    def get_attachments(self):
-        return self.attachments.all()
-    attachment_query = property(get_attachments)
 
     Class = models.ForeignKey('assignment.Class')
     teacher = models.ForeignKey('assignment.User')

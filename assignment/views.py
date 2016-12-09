@@ -48,9 +48,11 @@ def attachment_get(request, uri):
     except:
         raise KeyError
 
-    f = attach.content.open('rb')
-    response = HttpResponse(f.read())
-    mime, encoding = mimetypes.guess_type(f)
+    f = attach.content
+    f_bytes = f.read()
+    f.close()
+    response = HttpResponse(f_bytes)
+    mime, encoding = mimetypes.guess_type(f_bytes)
     if mime is None:
         mime = 'application/octet-stream'
     response['Content-Type'] = mime
@@ -149,10 +151,12 @@ def dashboard(request):
             for i in user_class.assignments.filter(due__gte=timezone.now()).all():
                 if PersonalAssignment.objects.filter(student=user).filter(assignment=i).count() == 0:
                     finished[len(assignment_query)] = False
+                    assignment_query[len(assignment_query)] = i
                 else:
-                    count_completion['completed'] += 1
-                    finished[len(assignment_query)] = True
-                assignment_query[len(assignment_query)] = i
+                    if i.type == 1:
+                        count_completion['completed'] += 1
+                        finished[len(assignment_query)] = True
+                        assignment_query[len(assignment_query)] = i
 
                 # Only type 1 (assignment) is counted
                 if i.type == 1:
@@ -209,8 +213,11 @@ def markUnComplete(request):
     return redirect('/')
 
 
-def update_sql():
+def update_sql(request):
+    if not request.user.is_superuser:
+        return redirect('/')
     # remove outdated info
     for i in PersonalAssignment.objects.all():
         if i.assignment.due < timezone.now():
             i.delete()
+    return redirect('/admin')

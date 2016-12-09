@@ -20,4 +20,4 @@ admin.site.register(PersonalAssignment)
 @admin.register(Attachment)
 class AttachmentFile(admin.ModelAdmin):
     fields = ('name', 'content', 'md5')
-    readonly_fields = ('md5', 'size')
+    readonly_fields = ('size', )
