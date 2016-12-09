@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html style="background: url('/static/framework/sam/login-bg.png') no-repeat center center fixed;">
+<meta name="viewport" content="width=device-width" />
+<head>
+    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="stylesheet" href="/static/framework/material/material.min.css">
+    <link rel="stylesheet" href="/static/framework/material/material-dashboard-styles.css">
+    <link rel="stylesheet" href="/static/framework/geodesic/base.css">
+    <link rel="stylesheet" href="/static/framework/sam/login.css">
+</head>
+<body style="background-color: transparent;">
+<script src="/static/framework/js/jq.js"></script>
+<script src="/static/framework/js/material.js"></script>
+<script>
+    function forgotPassword(){
+        var user = $('#usnmInput').val();
+        if (user == null || user == ""){
+            alert("Please input your username first!");
+        }else{
+            $.get("/modules/user/forgotPasswordSendMail.php",{user: user},function(data){
+                alert(data);
+            });
+        }
+    }
+</script>
+    <form id="form" action="/login" method="post">
+        <div id="request">
+            <div id="title">
+                Welcome
+            </div>
+            <div class="inputs">
+                <div class="input-box">
+                    <label class="func" id="user" for="usnmInput"></label>
+                    <input name="username" type="text" id="usnmInput" placeholder="Your Username"/>
+
+                </div>
+                <div class="input-box">
+                    <label class="func" id="pass" for="pswdInput"></label>
+                    <input name="password" type="password" id="pswdInput" placeholder="Your Password"/>
+                </div>
+                <input type="submit" style="display: none">
+            </div>
+            <hr />
+            <div class="buttons" align="center">
+                <a class="button" id="sign-in" style="margin-right: 1em" onclick="$('#form').submit()">
+                    SIGN IN
+                </a>
+                <a class="button" id="forget-password" onclick="forgotPassword()">
+                    FORGOT
+                </a>
+                {% csrf_token %}
+            </div>
+        </div>
+        <div id="hint-box">
+            <div id="hint">
+                {% if msg %}
+                <span id='errormsg'>Your username and password do not match.
+                    <span>            </span>
+                </span>
+                {% else %}
+                You have not signed in.<br /><br /> If you are the first time user of SAM, your username is the username on TSIMS, and your password is your username. <br />Please change your password as soon as possible.
+                {%  endif %}
+            </div>
+        </div>
+    </form>
+</body>
+
+
+
+
+</html>

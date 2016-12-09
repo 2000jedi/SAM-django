@@ -1,0 +1,127 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <title>SAM by Computerization</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/framework/geodesic/base.css" type="text/css">
+    <link rel="stylesheet" href="/static/framework/geodesic/settings.css" type="text/css">
+    <link rel="stylesheet" href="/static/framework/sam/main.css" type="text/css">
+
+    <script src="/static/framework/js/jq.js"></script>
+    <script src="/static/framework/js/form.js"></script>
+    <script src="/static/framework/js/masonry.js"></script>
+
+    <script src="/static/framework/sam/base.js"></script>
+    <script src="/static/framework/sam/assignment.js"></script>
+</head>
+
+<body>
+    <div class="banner">
+        <p id="left-banner">
+            <img src="/static/framework/sam/SAM_logo.svg" />
+            <span><lead>S</lead>AM <small>by Computerization</small></span>
+        </p>
+        <a id="apps-menu" onclick="showApps();">
+            <i style="height: 40px;line-height: 40px;" class="material-icons">apps</i>
+        </a>
+        <img id="avatar" src="/static/framework/material-images/user.png" height="40px">
+    </div>
+    <div id="apps-menu-detail" style="display: none;" aria-label="Apps" aria-hidden="false" role="region">
+        <ul class="list-apps" aria-dropeffect="move">
+            <li class="drag" id="app-classes">
+                <a class="app" onclick="showModule('classes')">
+                    <span class="app-img" style="background-image: url('/static/files/icons/classes.svg');background-size: 64px 64px;"></span>
+                    <span class="app-desc"><div style="margin: 0 auto;">Classes</div></span>
+                </a>
+            </li>
+
+            <li class="drag" id="app-settings">
+                <a class="app" onclick="showModule('settings')">
+                    <span class="app-img" style="background-image: url('/static/files/icons/setting.svg');background-size: 64px 64px;"></span>
+                    <span class="app-desc"><div style="margin: 0 auto;">Settings</div></span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div id="assignment">
+        <div id="assignment-stats" style="background-color: transparent;">
+            <canvas id="percentage" style="width: 15em;height: 15em;"></canvas>
+        </div>
+        <div id="greeting" style="background-color: transparent;">These are the assignments for today.</div>
+
+        <div id="assignment-list-wrapper">
+            <div class="vertical" style="height: {{ vertical }}px"></div>
+            <div id="assignment-list">
+            {% for index, assignment in assignments.iteritems %}
+            {% for i,item in finished.iteritems %}
+            {% if index == i %}
+            <div id=' assignment-list-{{ assignment.id }}' class='assignment-list'>
+                <div class='connector'></div>
+                <div class='title'>
+                    <div class='title-text'> {{ assignment.Class }}</div>
+                    <hr />
+                    <div class='assignment-info'> {% if assignment.type == 1 %} Assignment {% else %} Information {% endif %} From</div>
+                    <h2 class='subject'> {{ assignment.subject }} </h2>
+                </div>
+                <div class='content'>
+                    <div class='content-text' id=' assignment-list-content-{{ assignment.id }}'>
+                        <div class='content-holder'>
+                            {% autoescape on %}
+                            {{ assignment.content|linebreaksbr }}
+                            {% endautoescape %}
+                        </div>
+                        {% if attachment_query|length > 0 %}
+                        <hr class='attachment-divider' style='bottom: calc(0.5em + 1.5em * ({{ attachment_query|length }}-1)/2);'>
+                        {% for attachment in assignment.attachment_query %}
+                        <div style='display: flex; flex-direction: row;'>
+                            <span class='material-icons'>attachment</span>
+                            <div class='attachment-holder'>
+                                <a target=_blank style='text-indent: 5px' href='/attachment/{{ attachment.md5 }}'> attachment.name </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class='action'>
+                    {% if item %}
+                    <a href='#' class='btn-action-mark' onclick='markUnComplete({{ assignment.id }});' style="top: 20px;">
+                        Mark as Undone
+                    </a>
+                    {% else %}
+                    <a href='#' class='btn-action-mark' onclick='markComplete({{ assignment.id }});' style="top: 20px;">
+                        Mark as Done
+                    </a>
+                    {% endif %}
+                    {% if assignment.type == 1 %}
+                    <div class='time'>
+                        <span class='due-left'>Due Date</span>
+                        <span class='due-right'>{{ assignment.due }}</span>
+                    </div>
+                    <div class='time'>
+                        <span class='due-left'>Duration</span>
+                        <span class='due-right'> {{ assignment.duration }} mins</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if assignment.type == 1 %}
+                    {% if item %}
+                    <div class='bar-finished'></div>
+                    {% else %}
+                    <div class='bar-unfinished'></div>
+                    {% endif %}
+                {% endif %}
+                <div class='footer'></div>
+            </div>
+            {% endif %}
+        {% endfor %}
+        {% endfor %}
+        </div>
+    </div>
+    {% csrf_token %}
+</body>
+<script>
+    updatePercentage({{ percentage }})
+</script>
+</html>
