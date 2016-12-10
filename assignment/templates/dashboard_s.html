@@ -53,27 +53,25 @@
         <div id="assignment-list-wrapper">
             <div class="vertical" style="height: {{ vertical }}px"></div>
             <div id="assignment-list">
-            {% for index, assignment in assignments.iteritems %}
-            {% for i,item in finished.iteritems %}
-            {% if index == i %}
-            <div id=' assignment-list-{{ assignment.id }}' class='assignment-list'>
+            {% for assignment in assignments %}
+            <div id=' assignment-list-{{ assignment.assignment.id }}' class='assignment-list'>
                 <div class='connector'></div>
                 <div class='title'>
-                    <div class='title-text'> {{ assignment.Class }}</div>
+                    <div class='title-text'> {{ assignment.assignment.Class }}</div>
                     <hr />
-                    <div class='assignment-info'> {% if assignment.type == 1 %} Assignment {% else %} Information {% endif %} From</div>
-                    <h2 class='subject'> {{ assignment.teacher.subject }} </h2>
+                    <div class='assignment-info'> {% if assignment.assignment.type == 1 %} Assignment {% else %} Information {% endif %} From</div>
+                    <h2 class='subject'> {{ assignment.assignment.teacher.subject }} </h2>
                 </div>
                 <div class='content'>
-                    <div class='content-text' id=' assignment-list-content-{{ assignment.id }}'>
+                    <div class='content-text' id=' assignment-list-content-{{ assignment.assignment.id }}'>
                         <div class='content-holder'>
                             {% autoescape on %}
-                            {{ assignment.content|linebreaksbr }}
+                            {{ assignment.assignment.content|linebreaksbr }}
                             {% endautoescape %}
                         </div>
-                        {% if assignment.attachments.all|length > 0 %}
+                        {% if assignment.assignment.attachments.all|length > 0 %}
                         <hr class='attachment-divider' style='bottom: calc(0.5em + 1.5em * ({{ assignment.attachments.all|length }}));'>
-                        {% for attachment in assignment.attachments.all %}
+                        {% for attachment in assignment.assignment.attachments.all %}
                         <div class='attachment-holder'>
                             <div style='display: flex; flex-direction: row;'>
                                 <span class='material-icons'>attachment</span>
@@ -85,28 +83,28 @@
                     </div>
                 </div>
                 <div class='action'>
-                    {% if item %}
-                    <a href='#' class='btn-action-mark' onclick='markUnComplete({{ assignment.id }});' style="top: 20px;">
+                    {% if assignment.finished %}
+                    <a href='#' class='btn-action-mark' onclick='markUnComplete({{ assignment.assignment.id }});' style="top: 20px;">
                         Mark as Undone
                     </a>
                     {% else %}
-                    <a href='#' class='btn-action-mark' onclick='markComplete({{ assignment.id }});' style="top: 20px;">
+                    <a href='#' class='btn-action-mark' onclick='markComplete({{ assignment.assignment.id }});' style="top: 20px;">
                         Mark as Done
                     </a>
                     {% endif %}
-                    {% if assignment.type == 1 %}
+                    {% if assignment.assignment.type == 1 %}
                     <div class='time'>
                         <span class='due-left'>Due Date</span>
-                        <span class='due-right'>{{ assignment.due }}</span>
+                        <span class='due-right'>{{ assignment.assignment.due }}</span>
                     </div>
                     <div class='time'>
                         <span class='due-left'>Duration</span>
-                        <span class='due-right'> {{ assignment.duration }} mins</span>
+                        <span class='due-right'> {{ assignment.assignment.duration }} mins</span>
                     </div>
                     {% endif %}
                 </div>
-                {% if assignment.type == 1 %}
-                    {% if item %}
+                {% if assignment.assignment.type == 1 %}
+                    {% if assignment.finished %}
                     <div class='bar-finished'></div>
                     {% else %}
                     <div class='bar-unfinished'></div>
@@ -114,8 +112,6 @@
                 {% endif %}
                 <div class='footer'></div>
             </div>
-            {% endif %}
-        {% endfor %}
         {% endfor %}
         </div>
     </div>

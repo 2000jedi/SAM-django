@@ -10,6 +10,18 @@ from django.core.exceptions import SuspiciousOperation, PermissionDenied, Object
 import urllib
 
 
+class AssignmentForm:  # Student side assignment form
+    assignment = None
+    finished = None
+
+    def __init__(self, assignments, finished_status):
+        self.assignment = assignments
+        self.finished = finished_status
+
+    def __cmp__(self, other):
+        return self.assignment.due < other.assignment.due if self.assignment.due != other.assignment.due else self.assignment.publish > other.assignment.publish
+
+
 # logging
 def login_view(request):
     if request.user.is_authenticated():
@@ -33,13 +45,6 @@ def logout_view(request):
     return redirect('/')
 
 
-# sort by nearest due date and then longest since published
-def sort_fun(a, b):
-    if a.due != b.due:
-        return a.due < b.due
-    return a.publish > b.publish
-
-
 # attachment dealer
 def attachment_get(request, uri):
     if not request.user.is_authenticated():
@@ -49,36 +54,27 @@ def attachment_get(request, uri):
     except:
         raise ObjectDoesNotExist("File not exists")
 
-    f = attach.content
-    f_bytes = f.read()
-    f.close()
+    with attach.content as f:
+        f_bytes = f.read()
+        f.close()
     response = HttpResponse(f_bytes)
     mime, encoding = mimetypes.guess_type(f_bytes)
-    if mime is None:
-        mime = 'application/octet-stream'
-    response['Content-Type'] = mime
+    response['Content-Type'] = 'application/octet-stream' if mime is None else mime
     response['Content-Length'] = str(attach.size)
     if encoding is not None:
         response['Content-Encoding'] = encoding
-    if u'WebKit' in request.META['HTTP_USER_AGENT']:
-        filename_header = 'filename=%s' % attach.name.encode('utf-8')
-    elif u'MSIE' in request.META['HTTP_USER_AGENT']:
-        filename_header = ''
-    else:
-        filename_header = 'filename*=UTF-8\'\'%s' % urllib.quote(attach.name.encode('utf-8'))
+    # Chrome and Firefox behave differently
+    filename_header = 'filename=%s' % attach.name.encode('utf-8') if u'WebKit' in request.META['HTTP_USER_AGENT'] else 'filename*=UTF-8\'\'%s' % urllib.quote(attach.name.encode('utf-8'))
     response['Content-Disposition'] = 'attachment; ' + filename_header
     return response
 
 
-def attachment_upload(attach):
+def attachment_upload():  # TODO: Everything about uploading attachment
     pass
 
 
 def settings_view(request, alert_password=False):
-    if not request.user.is_authenticated():
-        return redirect('/login')
-
-    return render(request, 'settings.html', {'alert':alert_password})
+    return redirect('/login') if not request.user.is_authenticated() else render(request, 'settings.html', {'alert': alert_password})
 
 
 def settings_adjust(request, uri):
@@ -114,7 +110,7 @@ def class_view(request):
             'classes': classes
         }
         return render(request, 'classes_s.html', query)
-    if user.type == u't':
+    if user.type == u't':  # TODO: Teacher side class viewer
         classes = user.Class.all()
         query = {
             'classes': classes
@@ -132,7 +128,7 @@ def single_class_view(request, class_id):
     query = {
         'assignments': cls.assignments.all()
     }
-    return render(request, 'single_class.html', query)
+    return render(request, 'single_class_s.html', query)  # TODO: teacher side single class
 
 
 def dashboard(request):
@@ -142,50 +138,34 @@ def dashboard(request):
     user = User.objects.filter(user=request.user).first()
 
     if user.type == u's':
-        assignment_query = {}
-        finished = {}
-        count_completion = {
-            'total': 0,
-            'completed': 0
-        }
+        aggregate = []
+        count_finish = {'total': 0, 'finish': 0}
         for user_class in user.Class.all():
             for i in user_class.assignments.filter(due__gte=timezone.now()).all():
                 if PersonalAssignment.objects.filter(student=user).filter(assignment=i).count() == 0:
-                    finished[len(assignment_query)] = False
-                    assignment_query[len(assignment_query)] = i
+                    aggregate.append(AssignmentForm(i, False))
                 else:
                     if i.type == 1:
-                        count_completion['completed'] += 1
-                        finished[len(assignment_query)] = True
-                        assignment_query[len(assignment_query)] = i
-
+                        count_finish['finish'] += 1
+                        aggregate.append(AssignmentForm(i, True))
                 # Only type 1 (assignment) is counted
                 if i.type == 1:
-                    count_completion['total'] += 1
-
-        percentage = 1.0
-        if count_completion['total'] != 0:
-            percentage = count_completion['completed'] * 1.0 / count_completion['total']
+                    count_finish['total'] += 1
 
         # sort cards by time
-        for i in range(len(assignment_query)):
-            for j in range(i+1, len(assignment_query)):
-                if not sort_fun(assignment_query[i], assignment_query[j]):
-                    assignment_query[i], assignment_query[j] = assignment_query[j], assignment_query[i]
-                    finished[i], finished[j] = finished[j], finished[i]
+        aggregate.sort()
 
         query = {
-            "assignments": assignment_query,
-            "vertical": (-40 + 189 * len(assignment_query)),
-            "percentage": percentage,
-            "finished": finished
+            "assignments": aggregate,
+            "vertical": (-40 + 189 * len(aggregate)),
+            "percentage": count_finish['finish'] * 1.0 / count_finish['total'] if count_finish['total'] != 0 else 1.0
         }
         return render(request, 'dashboard_s.html', query)
     if user.type == u't':
         return redirect('/classes')
 
 
-def markComplete(request):
+def mark_complete(request):
     if not request.user.is_authenticated():
         return redirect('/login')
 
@@ -193,13 +173,12 @@ def markComplete(request):
         raise PermissionDenied("Method Not Supported")
 
     user = User.objects.filter(user=request.user).first()
-    newPA = PersonalAssignment(assignment=Assignment.objects.filter(id=request.POST['assignment_id']).first()
-                               , student=user)
-    newPA.save()
+    new_pa = PersonalAssignment(assignment=Assignment.objects.filter(id=request.POST['assignment_id']).first(), student=user)
+    new_pa.save()
     return redirect('/')
 
 
-def markUnComplete(request):
+def mark_incomplete(request):
     if not request.user.is_authenticated():
         return redirect('/login')
 
@@ -207,9 +186,7 @@ def markUnComplete(request):
         raise PermissionDenied("Method Not Supported")
 
     user = User.objects.filter(user=request.user).first()
-    for PA in PersonalAssignment.objects.filter(student=user,
-                                                assignment=Assignment.objects.filter(id=request.POST['assignment_id']))\
-            .all():
+    for PA in PersonalAssignment.objects.filter(student=user, assignment=Assignment.objects.filter(id=request.POST['assignment_id'])).all():
         PA.delete()
     return redirect('/')
 
@@ -222,3 +199,6 @@ def update_sql(request):
         if i.assignment.due < timezone.now():
             i.delete()
     return redirect('/admin')
+
+# TODO: Question & Answer
+# TODO: Club negotiation

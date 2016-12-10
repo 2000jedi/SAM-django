@@ -1,7 +1,7 @@
+from __future__ import print_function
 from django.db import models
 import datetime
 import hashlib
-import random
 
 
 class User(models.Model):
