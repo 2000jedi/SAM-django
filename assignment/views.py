@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from .models import *
 from django.utils import timezone
+from django.core.exceptions import SuspiciousOperation, PermissionDenied, ObjectDoesNotExist
 import urllib
 
 
@@ -20,7 +21,7 @@ def login_view(request):
         user = authenticate(username=username, password=password)
         if user is None:
             msg = True
-            raise StandardError
+            raise PermissionDenied("Username and Password does not match")
         login(request, user)
         return redirect('/')
     except:
@@ -46,7 +47,7 @@ def attachment_get(request, uri):
     try:
         attach = Attachment.objects.filter(md5=uri).all().first()
     except:
-        raise KeyError
+        raise ObjectDoesNotExist("File not exists")
 
     f = attach.content
     f_bytes = f.read()
@@ -85,7 +86,7 @@ def settings_adjust(request, uri):
         return redirect('/login')
 
     if request.method != 'POST':
-        raise KeyError(request.method + " is not supported")
+        raise PermissionDenied("Method not supported")
     if uri == 'password':
         if request.user.check_password(request.POST['oldPass']):
             request.user.set_password(request.POST['newPass'])
@@ -127,7 +128,7 @@ def single_class_view(request, class_id):
 
     cls = Class.objects.filter(id=class_id).first()
     if User.objects.filter(user=request.user, Class=cls).count() == 0:
-        return redirect('/login')
+        raise PermissionDenied('You are not enrolled to this class')
     query = {
         'assignments': cls.assignments.all()
     }
@@ -189,7 +190,7 @@ def markComplete(request):
         return redirect('/login')
 
     if request.method != 'POST':
-        raise KeyError("Method Not Supported")
+        raise PermissionDenied("Method Not Supported")
 
     user = User.objects.filter(user=request.user).first()
     newPA = PersonalAssignment(assignment=Assignment.objects.filter(id=request.POST['assignment_id']).first()
@@ -203,7 +204,7 @@ def markUnComplete(request):
         return redirect('/login')
 
     if request.method != 'POST':
-        raise KeyError("Method Not Supported")
+        raise PermissionDenied("Method Not Supported")
 
     user = User.objects.filter(user=request.user).first()
     for PA in PersonalAssignment.objects.filter(student=user,
@@ -215,7 +216,7 @@ def markUnComplete(request):
 
 def update_sql(request):
     if not request.user.is_superuser:
-        return redirect('/')
+        raise SuspiciousOperation('Must be Admin')
     # remove outdated info
     for i in PersonalAssignment.objects.all():
         if i.assignment.due < timezone.now():
