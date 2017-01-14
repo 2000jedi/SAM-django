@@ -6,14 +6,15 @@ function postcall(url,params){
     tempform.action = url;
     tempform.method = "post";
     tempform.style.display="none";
+    var opt;
     for (var x in params) {
-        var opt = document.createElement("input");
+        opt = document.createElement("input");
         opt.name = x;
         opt.setAttribute("value",params[x]);
         tempform.appendChild(opt);
     }
 
-    var opt = document.createElement("input");
+    opt = document.createElement("input");
     opt.type = "submit";
     opt.name = "postsubmit";
     tempform.appendChild(opt);

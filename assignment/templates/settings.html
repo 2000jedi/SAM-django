@@ -28,12 +28,14 @@
     </div>
     <div id="apps-menu-detail" style="display: none;" aria-label="Apps" aria-hidden="false" role="region">
         <ul class="list-apps" aria-dropeffect="move">
+            {% if user_type == 's' %}
             <li class="drag" id="app-assignment">
                 <a class="app" onclick="showModule('dashboard')">
                     <span class="app-img" style="background-image: url('/static/files/icons/assignments.svg');background-size: 64px 64px;"></span>
                     <span class="app-desc"><div style="margin: 0 auto;">Assignments</div></span>
                 </a>
             </li>
+            {% endif %}
 
             <li class="drag" id="app-classes">
                 <a class="app" onclick="showModule('classes')">

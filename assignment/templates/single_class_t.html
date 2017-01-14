@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <title>SAM by Computerization</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/framework/geodesic/base.css" type="text/css">
+    <link rel="stylesheet" href="/static/framework/geodesic/settings.css" type="text/css">
+    <link rel="stylesheet" href="/static/framework/sam/main.css" type="text/css">
+
+    <script src="/static/framework/js/jq.js"></script>
+    <script src="/static/framework/js/form.js"></script>
+    <script src="/static/framework/js/masonry.js"></script>
+</head>
+
+<body>
+    <div id="right-part-view-class">
+        <header id="single-class-header">
+            <div id="single-class-compile" onclick="window.location.href = '/classes';">
+                    <span class="single-class-banner">
+                        <span id="right-part-title">Manage Class</span>
+                        <span id="btn-action-cross">X</span>
+                    </span>
+            </div>
+        </header>
+        <div id="assignment-list-class">
+            <div id="assignment-list-class-pile" class="pile">
+                {% for assignment in assignments %}
+                <div id=' assignment-list-{{ assignment.id }}' class='assignment-list-class'>
+                    <div class='title'>
+                        <div class='title-text'> {{ assignment.Class }}</div>
+                        <hr />
+                        <div class='assignment-info'> {% if assignment.type == 1 %} Assignment {% else %} Information {% endif %} From</div>
+                        <h2 class='subject'> {{ assignment.teacher.subject }} </h2>
+                    </div>
+                    <div class='content'>
+                        <div class='content-text' id=' assignment-list-content-{{ assignment.id }}'>
+                            <div class='content-holder'>
+                                {% autoescape on %}
+                                {{ assignment.content|linebreaksbr }}
+                                {% endautoescape %}
+                            </div>
+                            {% if assignment.attachments.all|length > 0 %}
+                            <hr class='attachment-divider' style='bottom: calc(0.5em + 1.5em * ({{ assignment.attachments.all|length }}));'>
+                            {% for attachment in assignment.attachments.all %}
+                            <div class='attachment-holder'>
+                                <div style='display: flex; flex-direction: row;'>
+                                    <span class='material-icons'>attachment</span>
+                                    <a target=_blank style='text-indent: 5px' href='/attachment/{{ attachment.md5 }}'> {{ attachment.name }} </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class='footer'></div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

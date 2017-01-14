@@ -47,10 +47,10 @@ function updatePercentage(perc) { // draw assignment percentage circle
 
 function markComplete(assignment_id){
     var csrf = getCookie("csrftoken");
-    postcall("/dashboard/mark_as_complete", {assignment_id: assignment_id,csrfmiddlewaretoken: csrf});
+    postcall("/dashboard/mark_as_complete", {assignment_id: assignment_id, csrfmiddlewaretoken: csrf});
 }
 
 function markUnComplete(assignment_id){
     var csrf = getCookie("csrftoken");
-    postcall("/dashboard/mark_as_uncomplete", {assignment_id: assignment_id,csrfmiddlewaretoken: csrf});
+    postcall("/dashboard/mark_as_uncomplete", {assignment_id: assignment_id, csrfmiddlewaretoken: csrf});
 }

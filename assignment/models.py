@@ -16,6 +16,7 @@ class User(models.Model):
     subject = models.CharField(max_length=255, blank=True)
 
 
+# add class using User model
 class Class(models.Model):
     def __unicode__(self):
         return self.name
@@ -25,6 +26,7 @@ class Class(models.Model):
     assignments = models.ManyToManyField('assignment.Assignment', default=[])
 
 
+# add Attachment using Assignment Model
 class Attachment(models.Model):
     def __unicode__(self):
         return str(self.name)
@@ -49,6 +51,7 @@ class Attachment(models.Model):
         self.md5 = md5.hexdigest()
 
 
+# add Assignment using Class model
 class Assignment(models.Model):
     def __unicode__(self):
         return self.content[:16]

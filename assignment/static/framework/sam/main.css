@@ -364,7 +364,7 @@ div#right-part-view-class, div#assignment-list-class{
         overflow: visible;
     }
 
-    .class-content {
+    #class-content {
         width: 90%;
         min-width:1000px;
         margin: 0 auto;

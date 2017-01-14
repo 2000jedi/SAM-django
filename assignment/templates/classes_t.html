@@ -1,0 +1,125 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <title>SAM by Computerization</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/framework/geodesic/base.css" type="text/css">
+    <link rel="stylesheet" href="/static/framework/geodesic/settings.css" type="text/css">
+    <link rel="stylesheet" href="/static/framework/sam/main.css" type="text/css">
+    <link rel="stylesheet" href="/static/framework/sam/main-t.css" type="text/css">
+
+    <script src="/static/framework/js/jq.js"></script>
+    <script src="/static/framework/js/form.js"></script>
+    <script src="/static/framework/js/masonry.js"></script>
+
+    <script src="/static/framework/sam/base.js"></script>
+    <script src="/static/framework/sam/classes-t.js"></script>
+</head>
+<body>
+    <div class="banner {{ blur }}">
+        <p id="left-banner">
+            <img src="/static/framework/sam/SAM_logo.svg" />
+            <span><lead>S</lead>AM <small>by Computerization</small></span>
+        </p>
+        <a id="apps-menu" onclick="showApps();">
+            <i style="height: 40px;line-height: 40px;" class="material-icons">apps</i>
+        </a>
+        <img id="avatar" src="/static/framework/material-images/user.png" height="40px">
+    </div>
+
+    <div id="apps-menu-detail" class="{{ blur }}" style="display: none;" aria-label="Apps" aria-hidden="false" role="region">
+        <ul class="list-apps" aria-dropeffect="move">
+            <li class="drag" id="app-settings">
+                <a class="app" onclick="showModule('settings')">
+                    <span class="app-img" style="background-image: url('/static/files/icons/setting.svg');background-size: 64px 64px;"></span>
+                    <span class="app-desc"><div style="margin: 0 auto;">Settings</div></span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div id="classes" class="{{ blur }}">
+        <div id="greeting" style="background-color: transparent;">Manage your classes here.</div>
+        <div id="class-content" style="top:100px">
+            {% for class in classes %}
+            <div id=' assignment-list-{{ class.Class.id }}' class='assignment-list'>
+                <div class='title' style="margin: 0;">
+                    <div class='subject'> {{ class.Class.teacher.subject }}</div>
+                    <hr />
+                    <div class='assignment-info'> Class Information</div>
+                    <h2 class='title-text'> {{ class.Class.name }} (ID:{{ class.Class.id }}) </h2>
+                </div>
+                <div class='content' style="margin: 0;">
+                    <div class='content-text' id=' assignment-list-content-{{ class.Class.id }}'>
+                        <div class='student-enrolled'>
+                            Students enrolled:
+                        </div>
+                        <hr class='attachment-divider' />
+                        <div class="student-holder">
+                        {% for student in class.student_enrolled %}
+                            {{ student.ChineseName }}({{ student.EnglishName }}) ID: {{ student.user.username }}
+                        {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class='action' style="margin: 0;">
+                    <div class='btn-action-mark' onclick='newAssignment({{ class.Class.id }});' style="background-color: #74B3E3;">New Assignment</div>
+                    <div class='btn-action-mark' onclick='manageClass({{ class.Class.id }});' style="margin-top: 6px;background-color: #519DD9">Manage</div>
+                    <div class='btn-action-mark' onclick='addStudentPanel({{ class.Class.id }});' style="margin-top: 7px;background-color: #A1CDEE;">Update Students</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% if is_manage_user %}
+    <div id="management">
+        <div id="student-close" class="manage-button-t" onclick="window.location.href='/classes';">Close</div>
+        <div id="members">
+            <p>Members in my class</p>
+        </div>
+        <div id="update-member-mask">
+            <p id="update-member" class="manage-button-t" onclick="updateMembers({{ class_id }})">Update Members List</p>
+        </div>
+        <div id="member-list">
+            {% for student in students %}
+            <label>
+                <input type="checkbox" id="{{ student.student.user.username }}" class="check-student" {% if student.enrolled %}checked="checked"{% endif %}>
+                Name: {{ student.student.ChineseName }} ({{ student.student.EnglishName }}) ID: {{ student.student.user.username }}
+            </label>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% if is_manage_assignment %}
+    <div id="management">
+        <div class='title'>
+            <div class='title-text'>{{ cur_class.name }} </div>
+            <hr />
+            <div class='assignment-info'>
+                <select id="assignment-type-t" name="type">
+                <option value="1" selected="selected">assignment</option>
+                <option value="2">information</option>
+                </select> &nbsp;From
+            </div>
+            <h2 class='subject'> {{ cur_class.teacher.subject }} </h2>
+        </div>
+        <div class='content-t'>
+            <div class='content-text-t'>
+                <div class='content-holder-t'>
+                    <textarea id="assignment-content-t" rows="5" name="content" placeholder="Content"></textarea>
+                </div>
+                <hr class='attachment-divider-t'>
+                <div class='attachment-holder-t'>
+                    <div id="submit_button-t">
+                    </div>
+                    <div style='display: flex; flex-direction: row;'>
+                        <span class='material-icons'>attachment</span>
+                        add attachment here
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% csrf_token %}
+</body>
+</html>
